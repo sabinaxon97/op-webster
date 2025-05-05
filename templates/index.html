@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sabina Air Quality</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>Sabina Air Quality Dataset</h1>
+
+    <button onclick="document.getElementById('popupForm').style.display='block'">Add New Record</button>
+
+    <table>
+        <thead>
+            <tr>
+                {% for col in columns %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                    <td>
+                        <form method="POST" action="/delete/{{ row[-1] }}" onsubmit="return confirm('Delete this row?')">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Popup Add Form -->
+    <div id="popupForm" class="modal">
+        <form method="POST" action="/add" class="form-container">
+            <h2>Add Record</h2>
+            {% for col in columns[:-1] %}  <!-- Skip row_id -->
+                <label>{{ col }}:</label>
+                <input type="text" name="{{ col }}" required><br>
+            {% endfor %}
+            <button type="submit">Add</button>
+            <button type="button" onclick="document.getElementById('popupForm').style.display='none'">Cancel</button>
+        </form>
+    </div>
+</body>
+</html>
