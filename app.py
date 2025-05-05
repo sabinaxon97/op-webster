@@ -4,10 +4,10 @@ import psycopg2
 app = Flask(__name__)
 
 # Replace with your actual RDS PostgreSQL credentials
-DB_HOST = "your-rds-endpoint"
-DB_NAME = "dbsabina3t"
-DB_USER = "your-username"
-DB_PASS = "your-password"
+DB_HOST = "sabinasabitova.c32geugqgvkj.ap-southeast-1.rds.amazonaws.com"
+DB_NAME = "db_sabina3t"
+DB_USER = "sabina"
+DB_PASS = "sabinasabitova23"
 
 def get_connection():
     return psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASS)
@@ -50,4 +50,4 @@ def delete(row_id):
     return redirect('/')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
