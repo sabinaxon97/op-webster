@@ -11,40 +11,99 @@
 
     <table>
         <thead>
-            <tr>
-                {% for col in columns %}
-                    <th>{{ col }}</th>
-                {% endfor %}
-                <th>Actions</th>
+            <tr id="table-head">
+                <!-- Filled by JS -->
             </tr>
         </thead>
-        <tbody>
-            {% for row in rows %}
-                <tr>
-                    {% for cell in row %}
-                        <td>{{ cell }}</td>
-                    {% endfor %}
-                    <td>
-                        <form method="POST" action="/delete/{{ row[-1] }}" onsubmit="return confirm('Delete this row?')">
-                            <button type="submit">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
+        <tbody id="table-body">
+            <!-- Filled by JS -->
         </tbody>
     </table>
 
     <!-- Popup Add Form -->
-    <div id="popupForm" class="modal">
-        <form method="POST" action="/add" class="form-container">
+    <div id="popupForm" class="modal" style="display:none;">
+        <form id="add-form" class="form-container">
             <h2>Add Record</h2>
-            {% for col in columns[:-1] %}  <!-- Skip row_id -->
-                <label>{{ col }}:</label>
-                <input type="text" name="{{ col }}" required><br>
-            {% endfor %}
+            <div id="form-fields">
+                <!-- Filled by JS -->
+            </div>
             <button type="submit">Add</button>
             <button type="button" onclick="document.getElementById('popupForm').style.display='none'">Cancel</button>
         </form>
     </div>
+
+    <script>
+        const backendUrl = "http://18.136.101.227:5000/api"; // replace with actual backend IP
+
+        // Fetch and display data
+        fetch(backendUrl)
+            .then(response => response.json())
+            .then(data => {
+                const columns = data.columns;
+                const rows = data.rows;
+
+                const headRow = document.getElementById('table-head');
+                columns.forEach(col => {
+                    const th = document.createElement('th');
+                    th.textContent = col;
+                    headRow.appendChild(th);
+                });
+                const actionTh = document.createElement('th');
+                actionTh.textContent = 'Actions';
+                headRow.appendChild(actionTh);
+
+                const tableBody = document.getElementById('table-body');
+                rows.forEach(row => {
+                    const tr = document.createElement('tr');
+                    row.forEach(cell => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        tr.appendChild(td);
+                    });
+
+                    const actionTd = document.createElement('td');
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.onclick = () => {
+                        fetch(`${backendUrl}/delete/${row[row.length - 1]}`, { method: 'POST' })
+                            .then(() => location.reload());
+                    };
+                    actionTd.appendChild(deleteBtn);
+                    tr.appendChild(actionTd);
+
+                    tableBody.appendChild(tr);
+                });
+
+                // Create form fields
+                const formFields = document.getElementById('form-fields');
+                columns.slice(0, -1).forEach(col => {
+                    const label = document.createElement('label');
+                    label.textContent = `${col}:`;
+                    const input = document.createElement('input');
+                    input.name = col;
+                    input.required = true;
+                    input.type = "text";
+                    formFields.appendChild(label);
+                    formFields.appendChild(input);
+                    formFields.appendChild(document.createElement("br"));
+                });
+
+                // Handle form submission
+                document.getElementById('add-form').onsubmit = (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const dataObj = {};
+                    formData.forEach((value, key) => dataObj[key] = value);
+
+                    fetch(`${backendUrl}/add`, {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(dataObj)
+                    }).then(() => location.reload());
+                };
+            });
+    </script>
 </body>
 </html>
